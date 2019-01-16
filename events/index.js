@@ -13,6 +13,13 @@ channel.on('join', function(id, client) {
       this.clients[id].write(message);
     }
   };
+
+  const welcome = `
+  Welcome!
+    Guests online: ${this.listeners('broadcast').length}
+  `;
+  client.write(`${welcome}\n`);
+
   this.on('broadcast', this.subscriptions[id]);
 });
 
@@ -24,6 +31,7 @@ channel.on('leave', function(id) {
 channel.on('shutdown', () => {
   channel.emit('broadcast', '', 'The server has shut down.\n');
   channel.removeAllListeners('broadcast');
+  process.exit(1);
 });
 
 const server = net.createServer(client => {
@@ -34,7 +42,8 @@ const server = net.createServer(client => {
   client.on('data', data => {
     data = data.toString();
     
-    if (data === 'shutdown') {
+    if (data === 'shutdown\r\n') {
+      console.log('shutdown');
       channel.emit('shutdown');
     }
 
